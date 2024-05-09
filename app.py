@@ -80,7 +80,7 @@ def upload_file():
             os.remove(zip_path)
             return "No text file found in the ZIP.", 400
     else:
-        return "No file provided", 400
+        return "No file provided !", 400
 
 def generate_unique_filename(user_name, friend_name):
     unique_id = uuid4()
