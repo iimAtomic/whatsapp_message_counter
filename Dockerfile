@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Copier le fichier des dépendances et installer les dépendances
 COPY requirements.txt .
+RUN mkdir -p /app/temp
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier le reste du code source de l'application dans le conteneur
