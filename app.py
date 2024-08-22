@@ -50,24 +50,41 @@ def upload_file():
                     messages = f.readlines()
                 message_count = len(messages)
             
-                # Create a green rounded rectangle background
-                background = Image.new('RGBA', (800, 300), (255, 255, 255, 0))  # Transparent background
-                d = ImageDraw.Draw(background)
-                d.rounded_rectangle([(0, 0), (800, 300)], 30, fill=(153, 204, 102))
+                # Create a modern gradient background with rounded corners
+                background = Image.new('RGBA', (800, 400), (255, 255, 255, 0))  # Transparent background
+                draw = ImageDraw.Draw(background)
+                
+                # Gradient background
+                for i in range(400):
+                    draw.line([(0, i), (800, i)], fill=(153 - i//4, 204 - i//4, 102 + i//8))
+                
+                # Rounded rectangle with shadow
+                rounded_rect = Image.new('RGBA', (750, 350), (255, 255, 255, 255))
+                d = ImageDraw.Draw(rounded_rect)
+                d.rounded_rectangle([(0, 0), (750, 350)], 30, fill=(255, 255, 255, 230))
+                shadow = ImageOps.expand(rounded_rect, border=10, fill=(0, 0, 0, 128))
+                background.paste(shadow, (25, 25), shadow)
+                background.paste(rounded_rect, (25, 25), rounded_rect)
 
-                # Define font
-                font_path = 'fonts/arial.ttf'
-                font_large = ImageFont.truetype(font_path, 80)
-                font_small = ImageFont.truetype(font_path, 32)
-
-                # Position and draw text
-                d.text((100, 30), f"{user_name}", fill=(0, 0, 0), font=font_small)
-                d.text((600, 30), f"{friend_name}", fill=(0, 0, 0), font=font_small)
-                d.text((300, 110), f"{message_count}", fill=(0, 0, 0), font=font_large ,align=('center'),)
-                d.text((300, 210), "Messages WhatsApp", fill=(0, 0, 0), font=font_small)
-                d.text((300, 250), "Partagez", fill=(0, 0, 0), font=font_small)
-
-                # Save and respond
+                # Define font paths and sizes
+                font_path_bold = 'fonts/arialbd.ttf'  # Bold font
+                font_path_regular = 'fonts/arial.ttf'  # Regular font
+                font_large = ImageFont.truetype(font_path_bold, 80)
+                font_medium = ImageFont.truetype(font_path_bold, 50)
+                font_small = ImageFont.truetype(font_path_regular, 30)
+                
+                # Draw names
+                draw.text((50, 50), f"{user_name}", fill=(51, 51, 51), font=font_medium)
+                draw.text((600, 50), f"{friend_name}", fill=(51, 51, 51), font=font_medium)
+                
+                # Draw message count
+                draw.text((300, 150), f"{message_count}", fill=(0, 102, 51), font=font_large, align='center')
+                
+                # Draw additional text
+                draw.text((280, 240), "WhatsApp Messages", fill=(102, 102, 102), font=font_small)
+                draw.text((320, 290), "Share this!", fill=(102, 102, 102), font=font_small)
+                
+                # Save and respond with the image path
                 image_path = generate_unique_filename(user_name, friend_name)
                 background.save(image_path)
 
@@ -80,7 +97,7 @@ def upload_file():
             os.remove(zip_path)
             return "No text file found in the ZIP.", 400
     else:
-        return "No file provided !", 400
+        return "No file provided!", 400
 
 def generate_unique_filename(user_name, friend_name):
     unique_id = uuid4()

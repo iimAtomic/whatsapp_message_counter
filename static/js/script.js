@@ -1,4 +1,10 @@
 $(document).ready(function() {
+    // Toggle menu visibility
+    $('#menuToggle').click(function() {
+        $('#navbarLinks').toggleClass('show');
+    });
+
+    // Form submission handler
     $('#uploadForm').submit(function(e) {
         e.preventDefault();
         var formData = new FormData(this);
@@ -16,33 +22,41 @@ $(document).ready(function() {
             }
         });
     });
-});
 
-function openModal(imageUrl) {
-    var modal = document.getElementById('resultModal');
-    var img = document.getElementById('resultImage');
-    var span = document.getElementsByClassName("close")[0];
+    // Open and close modal
+    function openModal(imageUrl) {
+        var modal = document.getElementById('resultModal');
+        var img = document.getElementById('resultImage');
+        var span = document.getElementsByClassName("close")[0];
 
-    img.src = imageUrl;
-    modal.style.display = "block";
+        img.src = imageUrl;
+        modal.style.display = "block";
 
-    span.onclick = function() {
-        modal.style.display = "none";
-        document.body.classList.remove('blurred');
-    }
+        span.onclick = function() {
+            closeModal();
+        }
 
-    window.onclick = function(event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-            document.body.classList.remove('blurred');
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
         }
     }
 
-    // document.body.classList.add('blurred');
-}
+    function closeModal() {
+        // Close modal
+        const modal = document.getElementById('resultModal');
+        modal.style.display = 'none';
 
-function shareOnWhatsApp() {
-    var imgSrc = document.getElementById('resultImage').src;
-    var whatsappUrl = `https://wa.me/?text=Check out this message! ${encodeURIComponent(imgSrc)}`;
-    window.open(whatsappUrl, '_blank');
-}
+        // Reset the form
+        const form = document.getElementById('uploadForm');
+        form.reset();
+    }
+
+    // Share on WhatsApp
+    window.shareOnWhatsApp = function() {
+        var imgSrc = document.getElementById('resultImage').src;
+        var whatsappUrl = `https://wa.me/?text=Check out this message! ${encodeURIComponent(imgSrc)}`;
+        window.open(whatsappUrl, '_blank');
+    }
+});
