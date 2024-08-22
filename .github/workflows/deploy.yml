@@ -38,10 +38,12 @@ jobs:
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           sudo yum update -y
           sudo yum install docker -y
-          sudo service docker start
+          sudo systemctl start docker
+          sudo systemctl enable docker
           sudo usermod -a -G docker ${{ secrets.SSH_USER }}
           docker pull ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
           docker stop flask-app || true
           docker rm flask-app || true
           docker run -d --name flask-app -p 80:5000 ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
+          docker logs flask-app
         EOF
