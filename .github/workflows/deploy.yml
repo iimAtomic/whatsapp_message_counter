@@ -24,8 +24,8 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/flask-app:latest -f Dockerfile .
-        docker push ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
+        docker build -t lumeous/chatcount:latest -f Dockerfile .
+        docker push lumeous/chatcount:latest
 
     - name: Install SSH key
       uses: shimataro/ssh-key-action@v2
@@ -41,9 +41,9 @@ jobs:
           sudo systemctl start docker
           sudo systemctl enable docker
           sudo usermod -a -G docker ${{ secrets.SSH_USER }}
-          docker pull ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
-          docker stop flask-app || true
-          docker rm flask-app || true
-          docker run -d --name flask-app -p 80:5000 ${{ secrets.DOCKER_USERNAME }}/flask-app:latest
-          docker logs flask-app
+          docker pull lumeous/chatcount:latest
+          docker stop chatcount || true
+          docker rm chatcount || true
+          docker run -d --name chatcount -p 80:5000 lumeous/chatcount:latest
+          docker logs chatcount
         EOF
