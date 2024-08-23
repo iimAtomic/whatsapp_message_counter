@@ -28,8 +28,18 @@ $(document).ready(function() {
         var modal = document.getElementById('resultModal');
         var img = document.getElementById('resultImage');
         var span = document.getElementsByClassName("close")[0];
+        var downloadButton = document.getElementById('downloadButton');
 
         img.src = imageUrl;
+        downloadButton.onclick = function() {
+            // Créer un lien temporaire pour télécharger l'image
+            var link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = imageUrl.split('/').pop(); // Nom de fichier pour le téléchargement
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
         modal.style.display = "block";
 
         span.onclick = function() {
@@ -51,12 +61,5 @@ $(document).ready(function() {
         // Reset the form
         const form = document.getElementById('uploadForm');
         form.reset();
-    }
-
-    // Share on WhatsApp
-    window.shareOnWhatsApp = function() {
-        var imgSrc = document.getElementById('resultImage').src;
-        var whatsappUrl = `https://wa.me/?text=Check out this message! ${encodeURIComponent(imgSrc)}`;
-        window.open(whatsappUrl, '_blank');
     }
 });
