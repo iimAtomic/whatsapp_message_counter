@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, render_template, jsonify
+from flask import Flask, request, jsonify, render_template
 import zipfile
 import os
 import re
@@ -100,17 +100,22 @@ def upload_file():
     else:
         return "Aucun fichier fourni !", 400
 
+import re
+
 def count_messages(file_path):
-    """Compter le nombre de messages en se basant sur les horodatages."""
+    """Compter le nombre de lignes contenant au moins un chiffre."""
     message_count = 0
-    timestamp_pattern = re.compile(r'\d{2}/\d{2}/\d{4}, \d{2}:\d{2}')  # Format de timestamp typique
 
     with open(file_path, 'r', encoding='utf-8') as f:
         for line in f:
-            if timestamp_pattern.match(line):
+            # Compter la ligne si elle contient au moins un chiffre
+            if any(char.isdigit() for char in line):
                 message_count += 1
     
     return message_count
+
+
+
 
 def generate_unique_filename(user_name, friend_name):
     unique_id = uuid4()
