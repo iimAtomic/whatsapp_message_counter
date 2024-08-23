@@ -1,6 +1,7 @@
 from flask import Flask, request, send_file, render_template, jsonify
 import zipfile
 import os
+import re
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from uuid import uuid4
 
@@ -23,14 +24,15 @@ def update_visit_count():
 
 @app.route('/')
 def index():
-   visits = update_visit_count()
-   return render_template('index.html', visits=visits)
+    visits = update_visit_count()
+    return render_template('index.html', visits=visits)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     file = request.files['file']
     user_name = request.form['userName']
     friend_name = request.form['friendName']
+    
     if file:
         zip_path = 'temp/zipfile.zip'
         file.save(zip_path)
@@ -46,19 +48,17 @@ def upload_file():
 
         if messages_path and os.path.exists(messages_path):
             try:
-                with open(messages_path, 'r', encoding='utf-8') as f:
-                    messages = f.readlines()
-                message_count = len(messages)
+                message_count = count_messages(messages_path)
             
-                # Create a modern gradient background with rounded corners
-                background = Image.new('RGBA', (800, 400), (255, 255, 255, 0))  # Transparent background
+                # Créer un fond moderne avec un dégradé et des coins arrondis
+                background = Image.new('RGBA', (800, 400), (255, 255, 255, 0))  # Fond transparent
                 draw = ImageDraw.Draw(background)
                 
-                # Gradient background
+                # Dégradé de fond
                 for i in range(400):
                     draw.line([(0, i), (800, i)], fill=(153 - i//4, 204 - i//4, 102 + i//8))
                 
-                # Rounded rectangle with shadow
+                # Rectangle arrondi avec ombre
                 rounded_rect = Image.new('RGBA', (750, 350), (255, 255, 255, 255))
                 d = ImageDraw.Draw(rounded_rect)
                 d.rounded_rectangle([(0, 0), (750, 350)], 30, fill=(255, 255, 255, 230))
@@ -66,25 +66,25 @@ def upload_file():
                 background.paste(shadow, (25, 25), shadow)
                 background.paste(rounded_rect, (25, 25), rounded_rect)
 
-                # Define font paths and sizes
-                font_path_bold = 'fonts/arialbd.ttf'  # Bold font
-                font_path_regular = 'fonts/arial.ttf'  # Regular font
+                # Définir les chemins de police et les tailles
+                font_path_bold = 'fonts/arialbd.ttf'  # Police en gras
+                font_path_regular = 'fonts/arial.ttf'  # Police régulière
                 font_large = ImageFont.truetype(font_path_bold, 80)
                 font_medium = ImageFont.truetype(font_path_bold, 50)
                 font_small = ImageFont.truetype(font_path_regular, 30)
                 
-                # Draw names
+                # Dessiner les noms
                 draw.text((50, 50), f"{user_name}", fill=(51, 51, 51), font=font_medium)
                 draw.text((600, 50), f"{friend_name}", fill=(51, 51, 51), font=font_medium)
                 
-                # Draw message count
+                # Dessiner le compte des messages
                 draw.text((300, 150), f"{message_count}", fill=(0, 102, 51), font=font_large, align='center')
                 
-                # Draw additional text
-                draw.text((280, 240), "WhatsApp Messages", fill=(102, 102, 102), font=font_small)
-                draw.text((320, 290), "Share this!", fill=(102, 102, 102), font=font_small)
+                # Dessiner le texte supplémentaire
+                draw.text((280, 240), "Messages WhatsApp", fill=(102, 102, 102), font=font_small)
+                draw.text((320, 290), "Partagez ceci !", fill=(102, 102, 102), font=font_small)
                 
-                # Save and respond with the image path
+                # Sauvegarder et répondre avec le chemin de l'image
                 image_path = generate_unique_filename(user_name, friend_name)
                 background.save(image_path)
 
@@ -93,12 +93,24 @@ def upload_file():
                 
                 return jsonify({'image_url': image_path})
             except UnicodeDecodeError:
-                return "Unicode decode error", 400
+                return "Erreur de décodage Unicode", 400
         else:
             os.remove(zip_path)
-            return "No text file found in the ZIP.", 400
+            return "Aucun fichier texte trouvé dans le ZIP.", 400
     else:
-        return "No file provided!", 400
+        return "Aucun fichier fourni !", 400
+
+def count_messages(file_path):
+    """Compter le nombre de messages en se basant sur les horodatages."""
+    message_count = 0
+    timestamp_pattern = re.compile(r'\d{2}/\d{2}/\d{4}, \d{2}:\d{2}')  # Format de timestamp typique
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            if timestamp_pattern.match(line):
+                message_count += 1
+    
+    return message_count
 
 def generate_unique_filename(user_name, friend_name):
     unique_id = uuid4()
