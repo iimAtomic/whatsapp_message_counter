@@ -90,6 +90,7 @@ def upload_file():
 
                 os.remove(messages_path)
                 os.remove(zip_path)
+                
                 return jsonify({'image_url': image_path})
             except UnicodeDecodeError:
                 return "Unicode decode error", 400
